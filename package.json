@@ -21,5 +21,6 @@
     "electron": "^8.0.2"
   },
   "dependencies": {
+    "fix-path": "^3.0.0"
   }
 }

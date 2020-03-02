@@ -1,7 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const exec = require('child_process').exec;
+const fixPath = require('fix-path');
 
 function sanityCheck() {
+    fixPath();
+
     let initWin = new BrowserWindow({
         width: 400,
         height: 300,
