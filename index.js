@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const exec = require('child_process').exec;
 const fixPath = require('fix-path');
+let win = undefined;
 
 function sanityCheck() {
     fixPath();
@@ -22,6 +23,7 @@ function sanityCheck() {
                     if (!error) {
                         initWin.webContents.send('asynchronous-message', {'program': 'itk', 'result': 'success'});
                         exec("docker pull terf/image-processing:latest", (error, stdout, stderr) => {
+                            initWin.destroy();
                             initWin = null;
                             createWindow();
                         });
@@ -38,7 +40,7 @@ function sanityCheck() {
 
 function createWindow() {
     // Create the browser window.
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
@@ -53,17 +55,17 @@ function createWindow() {
 
 function pipeline(baseline, followup, type) {
     // SECURITY TODO: validate args if using them to exec
-    // console.log('docker run -v '+baseline+':/baseline -v '+followup+':/followup -v $(pwd)/processed:/processed --rm terf/image-processing Rscript /src/app.R');
-    exec('docker run -v ' + baseline + ':/baseline -v ' + followup + ':/followup -v $(pwd)/processed:/processed --rm terf/image-processing Rscript /src/app.R', {},
-        function (error, stdout, stderr) {
-            if (error) throw error;
-            console.log(stderr + "\n" + stdout);
-        }
-    );
+    const docker = exec('docker run -v ' + baseline + ':/baseline -v ' + followup + ':/followup -v /tmp/processed:/processed --rm terf/image-processing');
+    docker.stdout.on('data', function(data) {
+        win.webContents.send('asynchronous-message', data);
+    });
+    docker.on('exit', function (code) {
+        win.webContents.send('asynchronous-message', -1);
+    })
 }
 
 function openITK() {
-    exec("for filename in ./processed/*.gz; do itksnap -g $filename; done;", (error, stdout, stderr) => {
+    exec("for filename in /tmp/processed/*.gz; do itksnap -g $filename; done;", (error, stdout, stderr) => {
         console.log(stdout, stderr);
     });
 }

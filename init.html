@@ -37,7 +37,7 @@
 <script>
   require('electron').ipcRenderer.on('asynchronous-message', (event, message) => {
     let id = message.program + '-' + message.result;
-    console.log(document.getElementById(id).classList.remove('d-none'));
+    document.getElementById(id).classList.remove('d-none');
   })
 </script>
 

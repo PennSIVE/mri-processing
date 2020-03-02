@@ -16,27 +16,39 @@
       <div class="col">
         <h1>Image Processing App</h1>
         <form id="form">
-          Baseline
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" id="baseline" webkitdirectory directory multiple>
-            <label class="custom-file-label" for="baseline">Choose file</label>
+          <div class="mb-4 mt-0">
+            Baseline
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="baseline" webkitdirectory directory multiple>
+              <label class="custom-file-label" for="baseline">Choose file</label>
+              <small id="baseline-help" class="text-success">&nbsp;</small>
+            </div>
           </div>
-          Follow-up
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" id="followup" webkitdirectory directory multiple>
-            <label class="custom-file-label" name="followup" for="followup">Choose file</label>
+          <div class="mb-4 mt-0">
+            Follow-up
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="followup" webkitdirectory directory multiple>
+              <label class="custom-file-label" name="followup" for="followup">Choose file</label>
+              <small id="followup-help" class="text-success">&nbsp;</small>
+            </div>
           </div>
-          Please select an image type:
-          <div class="custom-control custom-radio">
-            <input type="radio" id="t1" name="customRadio" class="custom-control-input">
-            <label class="custom-control-label" for="t1" name="t1">T1</label>
-          </div>
-          <div class="custom-control custom-radio">
-            <input type="radio" id="t2" name="customRadio" class="custom-control-input">
-            <label class="custom-control-label" for="t2" name="t2">T2</label>
+          <div class="mb-3">
+            Please select an image type:
+            <div class="custom-control custom-radio">
+              <input type="radio" id="t1" name="customRadio" class="custom-control-input">
+              <label class="custom-control-label" for="t1" name="t1">T1</label>
+            </div>
+            <div class="custom-control custom-radio">
+              <input type="radio" id="t2" name="customRadio" class="custom-control-input">
+              <label class="custom-control-label" for="t2" name="t2">T2</label>
+            </div>
           </div>
           <button type="submit" class="btn btn-primary">GO</button>
-          <button id="itk" type="submit" class="btn btn-primary">View images in ITK-SNAP</button>
+          <button id="itk" type="submit" class="btn btn-outline-primary">View images in ITK-SNAP</button>
+          <div class="progress d-none mt-3" id="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+          </div>
+          <pre class="pre-scrollable"><code id="code"></code></pre>
         </form>
       </div>
     </div>
@@ -57,19 +69,29 @@
       properties: ['openDirectory']
     });
     path.then(values => {
-      console.log(id, values.filePaths[0])
+      document.getElementById(id + '-help').innerText = 'You selected ' + values.filePaths[0];
       formData[id] = values.filePaths[0];
     });
   }
 
   function selectImageType(e) {
+    document.getElementById('t1').classList = 'is-valid custom-control-input';
+    document.getElementById('t2').classList = 'is-valid custom-control-input';
     formData.imageType = e.target.id;
   }
 
   function submitHandler(e) {
     e.preventDefault();
-    console.log(formData);
-    ipcRenderer.send('asynchronous-message', JSON.stringify(formData));
+    if (!formData.hasOwnProperty('imageType')) {
+      document.getElementById('t1').classList = 'is-invalid custom-control-input';
+      document.getElementById('t2').classList = 'is-invalid custom-control-input';
+    } else {
+      document.getElementById('t1').classList = 'is-valid custom-control-input';
+      document.getElementById('t2').classList = 'is-valid custom-control-input';
+      disableButtons(true);
+      document.getElementById('progress').classList.remove('d-none');
+      ipcRenderer.send('asynchronous-message', JSON.stringify(formData));
+    }
   }
 
   function openITK(e) {
@@ -78,6 +100,30 @@
       type: 'open'
     }));
   }
+
+  function disableButtons(bool) {
+    let buttons = document.getElementsByTagName("button");
+      for (let i = 0; i < buttons.length; i++) {
+        buttons[i].disabled = bool;
+      }
+  }
+
+  let lineCount = 0;
+  ipcRenderer.on('asynchronous-message', (event, message) => {
+    if (message === -1) { // we've reached the end
+      document.getElementById('progress').style.display = 'none';
+      document.getElementById('code').style.display = 'none';
+      disableButtons(false);
+      alert("Success! you may now open the images in ITK-SNAP");
+    }
+    lineCount += message.split(/\r\n|\r|\n/).length;
+    let frac = lineCount / 709; // there are about 709 lines in output
+    if (frac > 1) { // lol
+      frac = 1;
+    }
+    document.getElementById('progress').style.width = (frac * 100) + '%';
+    document.getElementById('code').innerText += message;
+  });
 
   document.getElementById('baseline').addEventListener('click', selectDir);
   document.getElementById('followup').addEventListener('click', selectDir);
