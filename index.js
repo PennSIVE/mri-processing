@@ -1,6 +1,30 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const exec = require('child_process').exec;
 
+function sanityCheck() {
+    let initWin = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    })
+    initWin.loadFile('init.html')
+
+    exec("which docker", (error, stdout, stderr) => {
+        if (!error) {
+            exec("which itksnap", (error, stdout, stderr) => {
+                if (!error) {
+                    exec("docker pull terf/image-processing:latest", (error, stdout, stderr) => {
+                        initWin = null;
+                        createWindow();
+                    });
+                }
+            });
+        }
+    });
+}
+
 function createWindow() {
     // Create the browser window.
     const win = new BrowserWindow({
@@ -13,14 +37,13 @@ function createWindow() {
 
     // and load the index.html of the app.
     win.loadFile('index.html')
-    win.webContents.openDevTools()
 
 }
 
 function pipeline(baseline, followup, type) {
     // SECURITY TODO: validate args if using them to exec
     // console.log('docker run -v '+baseline+':/baseline -v '+followup+':/followup -v $(pwd)/processed:/processed --rm terf/image-processing Rscript /src/app.R');
-    exec('docker run -v '+baseline+':/baseline -v '+followup+':/followup -v $(pwd)/processed:/processed --rm terf/image-processing Rscript /src/app.R', {},
+    exec('docker run -v ' + baseline + ':/baseline -v ' + followup + ':/followup -v $(pwd)/processed:/processed --rm terf/image-processing Rscript /src/app.R', {},
         function (error, stdout, stderr) {
             if (error) throw error;
             console.log(stderr + "\n" + stdout);
@@ -29,7 +52,7 @@ function pipeline(baseline, followup, type) {
 }
 
 function openITK() {
-    exec("for filename in ./processed/*.gz; do itksnap -g $filename; done;", (error, stdout, stderr) => { 
+    exec("for filename in ./processed/*.gz; do itksnap -g $filename; done;", (error, stdout, stderr) => {
         console.log(stdout, stderr);
     });
 }
@@ -37,7 +60,7 @@ function openITK() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow)
+app.whenReady().then(sanityCheck)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
