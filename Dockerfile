@@ -6,7 +6,7 @@ RUN r -e "install.packages(c('oro.nifti', 'oro.dicom', 'fslr', 'WhiteStripe', 'm
     r -e "devtools::install_github(c('muschellij2/extrantsr', 'muschellij2/itksnapr'), dependencies = FALSE)" && \
     mkdir /baseline /followup /processed
 
-COPY backend.R /src/
+COPY app.R /src/
 
 ENTRYPOINT []
-CMD bash
+CMD Rscript /src/app.R
