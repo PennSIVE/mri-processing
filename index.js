@@ -3,25 +3,33 @@ const exec = require('child_process').exec;
 
 function sanityCheck() {
     let initWin = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 400,
+        height: 300,
         webPreferences: {
             nodeIntegration: true
         }
     })
     initWin.loadFile('init.html')
 
-    exec("which docker", (error, stdout, stderr) => {
-        if (!error) {
-            exec("which itksnap", (error, stdout, stderr) => {
-                if (!error) {
-                    exec("docker pull terf/image-processing:latest", (error, stdout, stderr) => {
-                        initWin = null;
-                        createWindow();
-                    });
-                }
-            });
-        }
+    initWin.webContents.on('did-finish-load', () => {
+        exec("which docker", (error, stdout, stderr) => {
+            if (!error) {
+                initWin.webContents.send('asynchronous-message', {'program': 'docker', 'result': 'success'});
+                exec("which itksnap", (error, stdout, stderr) => {
+                    if (!error) {
+                        initWin.webContents.send('asynchronous-message', {'program': 'itk', 'result': 'success'});
+                        exec("docker pull terf/image-processing:latest", (error, stdout, stderr) => {
+                            initWin = null;
+                            createWindow();
+                        });
+                    } else {
+                        initWin.webContents.send('asynchronous-message', {'program': 'itk', 'result': 'fail'});
+                    }
+                });
+            } else {
+                initWin.webContents.send('asynchronous-message', {'program': 'docker', 'result': 'fail'});
+            }
+        });
     });
 }
 

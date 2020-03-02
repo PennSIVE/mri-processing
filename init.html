@@ -13,14 +13,32 @@
 <body>
   <div class="container">
     <div class="row">
-      <div class="col">
-        <h1>Loading dependencies...</h1>
+      <div class="col mt-2">
+        <div class="d-flex align-items-center mb-2">
+          <strong>Loading...</strong>
+          <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+        </div>
+        <div class="alert alert-success d-none" role="alert" id="docker-success">
+          Docker is installed
+        </div>
+        <div class="alert alert-success d-none" role="alert" id="itk-success">
+          ITK-SNAP and command line tools are installed
+        </div>
+        <div class="alert alert-danger d-none" role="alert" id="docker-fail">
+          Please install Docker
+        </div>
+        <div class="alert alert-danger d-none" role="alert" id="itk-fail">
+          ITK-SNAP or ITK-SNAP command line tools not installed. If you already have ITK-SNAP, install the command-line tools by going to the app menu > Help > "Install Command-Line Tools..."
+        </div>
       </div>
     </div>
   </div>
 </body>
 <script>
-
+  require('electron').ipcRenderer.on('asynchronous-message', (event, message) => {
+    let id = message.program + '-' + message.result;
+    console.log(document.getElementById(id).classList.remove('d-none'));
+  })
 </script>
 
 </html>
