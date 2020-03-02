@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t shiny-app .
+docker build -t image-processing .

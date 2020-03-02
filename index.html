@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+  <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <h1>Image Processing App</h1>
+        <form id="form">
+          Baseline
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="baseline" webkitdirectory directory multiple>
+            <label class="custom-file-label" for="baseline">Choose file</label>
+          </div>
+          Follow-up
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="followup" webkitdirectory directory multiple>
+            <label class="custom-file-label" name="followup" for="followup">Choose file</label>
+          </div>
+          Please select an image type:
+          <div class="custom-control custom-radio">
+            <input type="radio" id="t1" name="customRadio" class="custom-control-input">
+            <label class="custom-control-label" for="t1" name="t1">T1</label>
+          </div>
+          <div class="custom-control custom-radio">
+            <input type="radio" id="t2" name="customRadio" class="custom-control-input">
+            <label class="custom-control-label" for="t2" name="t2">T2</label>
+          </div>
+          <button type="submit" class="btn btn-primary">GO</button>
+          <button id="itk" type="submit" class="btn btn-primary">View images in ITK-SNAP</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  const electron = require('electron');
+  const { dialog } = electron.remote;
+  const { ipcRenderer } = electron;
+  let formData = {
+    type: 'submit'
+  };
+
+  function selectDir(e) {
+    e.preventDefault();
+    const id = e.target.id;
+    const path = dialog.showOpenDialog({
+      properties: ['openDirectory']
+    });
+    path.then(values => {
+      console.log(id, values.filePaths[0])
+      formData[id] = values.filePaths[0];
+    });
+  }
+
+  function selectImageType(e) {
+    formData.imageType = e.target.id;
+  }
+
+  function submitHandler(e) {
+    e.preventDefault();
+    console.log(formData);
+    ipcRenderer.send('asynchronous-message', JSON.stringify(formData));
+  }
+
+  function openITK(e) {
+    e.preventDefault();
+    ipcRenderer.send('asynchronous-message', JSON.stringify({
+      type: 'open'
+    }));
+  }
+
+  document.getElementById('baseline').addEventListener('click', selectDir);
+  document.getElementById('followup').addEventListener('click', selectDir);
+  document.getElementById('form').addEventListener('submit', submitHandler);
+  document.getElementById('itk').addEventListener('click', openITK);
+  document.getElementById('t1').addEventListener('click', selectImageType);
+  document.getElementById('t2').addEventListener('click', selectImageType);
+
+</script>
+
+</html>
