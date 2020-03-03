@@ -17,8 +17,9 @@ library(WhiteStripe)
 baselineDCMSource <- "/baseline"
 followupDCMSource <- "/followup"
 Processed_dir_path <- "/processed"
-ws_type <- "T1"
-   
+ws_type <- Sys.getenv("WS_TYPE")
+stopifnot(ws_type == "T1" || ws_type == "T2")
+
 #read in DICOM series 
 print(paste0("Now reading in dicom images"))
 baseline_img <<- readDICOM(baselineDCMSource)

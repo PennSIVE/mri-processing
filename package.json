@@ -1,24 +1,34 @@
 {
   "name": "image-processing",
   "version": "1.0.0",
-  "description": "You can run this container directly from [docker hub](https://hub.docker.com/r/terf/shiny-app) with `docker run -p 80:3838 -e PASSWORD=123 -d terf/shiny-app`, or you can clone this repo, `cd` into it, `./build.sh` to build the container and `./run.sh` to run it (on port 80). You should then be able to access the app at http://localhost",
+  "description": "Electron-based desktop app providing an interface to wrap around Kelly Clark & Melissa Martin's neuroimaging pre-processing pipeline, available on [docker hub](https://hub.docker.com/r/terf/image-processing).",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "./node_modules/.bin/electron-builder -mwl"
+  },
+  "build": {
+    "win": {
+      "target": "NSIS"
+    },
+    "linux": {
+      "target": "deb"
+    }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Terf/shiny-app.git"
+    "url": "git+https://github.com/Terf/mri-processing.git"
   },
   "author": "Tim Robert-Fitzgerald <Timothy.Robert-Fitzgerald@Pennmedicine.upenn.edu>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Terf/shiny-app/issues"
+    "url": "https://github.com/Terf/mri-processing/issues"
   },
-  "homepage": "https://github.com/Terf/shiny-app#readme",
+  "homepage": "https://github.com/Terf/mri-processing#readme",
   "devDependencies": {
-    "electron": "^8.0.2"
+    "electron": "^8.0.2",
+    "electron-builder": "^22.3.6"
   },
   "dependencies": {
     "fix-path": "^3.0.0"

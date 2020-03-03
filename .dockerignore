@@ -1,0 +1,8 @@
+node_modules
+dist
+*.json
+*.sh
+*.html
+*.js
+*.md
+

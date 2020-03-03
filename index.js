@@ -55,7 +55,7 @@ function createWindow() {
 
 function pipeline(baseline, followup, type) {
     // SECURITY TODO: validate args if using them to exec
-    const docker = exec('docker run -v ' + baseline + ':/baseline -v ' + followup + ':/followup -v /tmp/processed:/processed --rm terf/image-processing');
+    const docker = exec('docker run -e WS_TYPE=' + type + ' -v ' + baseline + ':/baseline -v ' + followup + ':/followup -v /tmp/processed:/processed --rm terf/image-processing');
     docker.stdout.on('data', function(data) {
         win.webContents.send('asynchronous-message', data);
     });
@@ -96,7 +96,7 @@ app.on('activate', () => {
 ipcMain.on('asynchronous-message', (event, arg) => {
     let json = JSON.parse(arg);
     if (json.type === 'submit') {
-        pipeline(json.baseline, json.followup, json.imageType);
+        pipeline(json.baseline, json.followup, json.imageType.toUpperCase());
     } else if (json.type === 'open') {
         openITK();
     }
