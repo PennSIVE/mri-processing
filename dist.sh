@@ -13,4 +13,4 @@ docker run --rm -ti \
  electronuserland/builder:wine /bin/bash -c "yarn && yarn dist"
 
 # build fo macOS
-npm run dist-mac
+# npm run dist-mac
