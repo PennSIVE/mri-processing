@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "dist": "./node_modules/.bin/electron-builder -mwl"
+    "dist": "./node_modules/.bin/electron-builder -wl",
+    "dist-mac": "./node_modules/.bin/electron-builder -m"
   },
   "build": {
     "win": {
