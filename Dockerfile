@@ -1,12 +1,10 @@
-# from https://github.com/ANTsX/ANTsR/issues/265#issuecomment-547964145
-FROM dorianps/antsr
+FROM processing-app-base
 
-RUN r -e "install.packages(c('oro.nifti', 'oro.dicom', 'fslr', 'WhiteStripe', 'matrixStats', 'R.matlab', 'abind', 'R.utils', 'RNifti', 'stapler'))" && \
-    r -e "source('https://neuroconductor.org/neurocLite.R'); neuro_install('neurobase')" && \
-    r -e "devtools::install_github(c('muschellij2/extrantsr', 'muschellij2/itksnapr'), dependencies = FALSE)" && \
+RUN Rscript -e "chooseCRANmirror(graphics=FALSE, ind=56); \
+    install.packages(c('oro.nifti', 'oro.dicom', 'fslr', 'WhiteStripe')); \
+    source('https://neuroconductor.org/neurocLite.R'); neuro_install(c('neurobase', 'ANTsR', 'extrantsr'))" && \
     mkdir /baseline /followup /processed
 
 COPY app.R /src/
 
-ENTRYPOINT []
-CMD Rscript /src/app.R
+ENTRYPOINT [ "Rscript", "/src/app.R" ]
