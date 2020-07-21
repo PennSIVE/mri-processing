@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - master
+name: Build and push docker image
 jobs:
   build:
     runs-on: ubuntu-latest
