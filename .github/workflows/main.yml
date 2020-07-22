@@ -1,5 +1,9 @@
 on:
   push:
+    paths:
+      - app.R
+      - Dockerfile
+      - build.sh
     branches:
       - master
 name: Build and push docker image
