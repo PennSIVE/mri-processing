@@ -11,7 +11,7 @@ RENV_VERSION=0.9.3
 docker run --rm repronim/neurodocker:0.7.0 generate docker \
     --pkg-manager apt \
     --base debian:buster \
-    --fsl version=5.0.11 \
+    --fsl version=6.0.3 \
     --run "apt-get update && apt-get install -y \
             gfortran \
             git \
