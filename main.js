@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+const { autoUpdater } = require("electron-updater");
 const exec = require('child_process').exec;
 const path = require('path');
 const fs = require('fs');
@@ -11,6 +12,7 @@ function init() {
     delete process.env.DISPLAY; // req'd to ensure ssh connection terminates when executing single commands e.g. ssh user@cubic cmd
     fixPath();
     createWindow();
+    autoUpdater.checkForUpdatesAndNotify();
 }
 
 function createWindow() {
@@ -30,12 +32,12 @@ function createWindow() {
 }
 
 function pipeline(baseline, followup, type, user) {
-    const singularity = exec(`ssh -oStrictHostKeyChecking=no -o ConnectTimeout=10 -oCheckHostIP=no -oUserKnownHostsFile=/dev/null ${user}@cubic-login "rm -rf ~/.electrondata/processed ; mkdir -p ~/.electrondata/processed ; qsub -b y -terse -l short -o testinggg -e testinggg -cwd WS_TYPE=${type} singularity run -B ~/.electrondata${baseline}:/baseline -B ~/.electrondata${followup}:/followup -B ~/.electrondata/processed:/processed /cbica/home/robertft/singularity_images/processing-app_latest.sif"`);
+    const singularity = exec(`ssh -oStrictHostKeyChecking=no -o ConnectTimeout=10 -oCheckHostIP=no -oUserKnownHostsFile=/dev/null ${user}@cubic-login "rm -rf ~/.electrondata/processed ; mkdir -p ~/.electrondata/processed ; qsub -b y -terse -o /dev/null -e /dev/null -cwd WS_TYPE=${type} singularity run -B ~/.electrondata${baseline}:/baseline -B ~/.electrondata${followup}:/followup -B ~/.electrondata/processed:/processed /cbica/home/robertft/singularity_images/processing-app_latest.sif"`);
     singularity.stdout.on('data', function (data) {
         // win.webContents.send('asynchronous-message', 1);
         console.log('pipeline', data)
-        // processing is going to take at least 3 mins (180 seconds), but check if it's done every 20s thereafter
-        setTimeout(() => { checkCompletion(parseInt(data), baseline, followup, user) }, 180 * 1000)
+        // processing is going to take at least 20 mins (1200 seconds), but check if it's done every 20s thereafter
+        setTimeout(() => { checkCompletion(parseInt(data), baseline, followup, user) }, 1200 * 1000)
     });
     // singularity.on('close', (code) => {
     //     if (code !== 0) {
@@ -102,7 +104,6 @@ function download(user) {
         rsync.execute(
             function (error, code, cmd) {
                 // we're done
-                console.log(error, code, cmd)
                 if (code === 0) { // success!
                     win.webContents.send('asynchronous-message', { type: 'downloaded', path: `${folder}/processed` });
                 }

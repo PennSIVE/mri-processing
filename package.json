@@ -1,38 +1,51 @@
 {
   "name": "image-processing",
-  "version": "1.0.0",
-  "description": "Electron-based desktop app providing an interface to wrap around Kelly Clark & Melissa Martin's neuroimaging pre-processing pipeline, available on [docker hub](https://hub.docker.com/r/terf/image-processing).",
-  "main": "index.js",
+  "version": "0.0.0",
+  "description": "GUI to upload baseline and followup scans to CUBIC cluster for processing",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "dist": "./node_modules/.bin/electron-builder --publish never -wl",
-    "dist-mac": "./node_modules/.bin/electron-builder -m"
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps",
+    "release-mac": "electron-builder -m -p always",
+    "release": "electron-builder -wl -p always"
   },
   "build": {
-    "win": {
-      "target": "NSIS"
-    },
-    "linux": {
-      "target": "deb"
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "pennsive",
+        "repo": "mri-processing"
+      }
+    ],
+    "appId": "com.github.pennsive.mri-processing",
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        "zip",
+        "dmg"
+      ]
     }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Terf/mri-processing.git"
   },
   "author": "Tim Robert-Fitzgerald <Timothy.Robert-Fitzgerald@Pennmedicine.upenn.edu>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Terf/mri-processing/issues"
+    "url": "https://github.com/PennSIVE/mri-processing/issues"
   },
-  "homepage": "https://github.com/Terf/mri-processing#readme",
+  "homepage": "https://github.com/PennSIVE/mri-processing#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PennSIVE/mri-processing.git"
+  },
   "devDependencies": {
-    "electron": "^8.4.0",
+    "electron": "^8.4.1",
     "electron-builder": "^22.7.0"
   },
   "dependencies": {
     "bootstrap": "^4.5.0",
+    "electron-updater": "^4.3.1",
     "fix-path": "^3.0.0",
     "rsync": "^0.6.1"
   }
