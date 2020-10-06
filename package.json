@@ -40,7 +40,7 @@
     "url": "git+https://github.com/PennSIVE/mri-processing.git"
   },
   "devDependencies": {
-    "electron": "^8.4.1",
+    "electron": "^8.5.1",
     "electron-builder": "^22.7.0"
   },
   "dependencies": {
